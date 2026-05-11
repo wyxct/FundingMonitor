@@ -1,0 +1,15 @@
+app:
+  port: 8080
+
+chain:
+  rpc: http://127.0.0.1:8545
+  contract: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+  startblock: 0
+
+postgres:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: 123
+  dbname: Funding
+  sslmode: disable
