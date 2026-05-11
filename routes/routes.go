@@ -1,0 +1,17 @@
+package routes
+
+import (
+	"funding-watch/controller"
+
+	"github.com/gin-gonic/gin"
+)
+
+func InitRoutes(router *gin.Engine) {
+	apiV1 := router.Group("/api/v1")
+	{
+		funding := apiV1.Group("/funding")
+		{
+			funding.POST("tx", controller.GetFundingRecords)
+		}
+	}
+}

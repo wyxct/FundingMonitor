@@ -127,14 +127,21 @@
 package main
 
 import (
+	"fmt"
 	"funding-watch/abi"
 	"funding-watch/config"
+	"funding-watch/routes"
 	"funding-watch/service"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	config.LoadConfig()
 	config.InitDB()
 	abi.InitABI()
-	service.StartWatch()
+	go service.StartWatch()
+	r := gin.Default()
+	routes.InitRoutes(r)
+	r.Run(fmt.Sprintf(":%s", config.C.App.Port))
 }

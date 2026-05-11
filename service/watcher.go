@@ -33,7 +33,7 @@ func StartWatch() {
 	parsedABI := abi.FundingABI
 
 	contractAddress := common.HexToAddress(contractAddr)
-
+	fmt.Printf("✅ 合约地址为：%s\n", contractAddress.Hex())
 	// 4. 从当前最新块开始监听
 	lastBlock, err := client.BlockNumber(context.Background())
 	if err != nil {
