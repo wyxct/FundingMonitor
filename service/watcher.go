@@ -74,42 +74,97 @@ func StartWatch() {
 		for _, vLog := range logs {
 			fmt.Printf("\n📥 收到交易：%s\n", vLog.TxHash.Hex())
 
-			event := struct {
-				Amount    *big.Int
-				Timestamp *big.Int
-			}{}
-			sender := common.HexToAddress(vLog.Topics[1].Hex())
-			err := parsedABI.UnpackIntoInterface(&event, "Funded", vLog.Data)
-			if err != nil {
-				fmt.Println("解析错误:", err)
+			eventSig := vLog.Topics[0].Hex()
+
+			fundedSig := parsedABI.Events["Funded"].ID.Hex()
+			refundedSig := parsedABI.Events["ReFunded"].ID.Hex()
+			distributeSig := parsedABI.Events["Distribute"].ID.Hex()
+
+			switch eventSig {
+			case fundedSig:
+				fmt.Println("✅ 收到 Funded 事件")
+				event := struct {
+					Amount    *big.Int
+					Timestamp *big.Int
+				}{}
+				sender := common.HexToAddress(vLog.Topics[1].Hex())
+				err := parsedABI.UnpackIntoInterface(&event, "Funded", vLog.Data)
+				if err != nil {
+					fmt.Println("解析错误:", err)
+					continue
+				}
+
+				// 转 ETH
+				amount := new(big.Float).Quo(
+					new(big.Float).SetInt(event.Amount),
+					big.NewFloat(1e18),
+				)
+
+				record := models.NewFundRecord(sender.Hex(), amount.String(), vLog.TxHash.Hex(), int64(vLog.BlockNumber))
+				err = record.Create()
+				if err != nil {
+					fmt.Println("写入数据库错误:", err)
+					continue
+				}
+				fmt.Println("✅ 已写入 PostgreSQL")
+			case refundedSig:
+				fmt.Println("✅ 收到 Refunded 事件")
+				event := struct {
+					Amount    *big.Int
+					Timestamp *big.Int
+				}{}
+				sender := common.HexToAddress(vLog.Topics[1].Hex())
+				err := parsedABI.UnpackIntoInterface(&event, "ReFunded", vLog.Data)
+				if err != nil {
+					fmt.Println("解析错误:", err)
+					continue
+				}
+
+				// 转 ETH
+				amount := new(big.Float).Quo(
+					new(big.Float).SetInt(event.Amount),
+					big.NewFloat(1e18),
+				)
+
+				record := models.NewReFundRecord(sender.Hex(), amount.String(), vLog.TxHash.Hex(), int64(vLog.BlockNumber))
+				err = record.Create()
+				if err != nil {
+					fmt.Println("写入数据库错误:", err)
+					continue
+				}
+				fmt.Println("✅ 已写入 PostgreSQL")
+			case distributeSig:
+				fmt.Println("✅ 收到 Distribute 事件")
+				event := struct {
+					Amount    *big.Int
+					Timestamp *big.Int
+				}{}
+				DistributeAddr := common.HexToAddress(vLog.Topics[1].Hex())
+				err := parsedABI.UnpackIntoInterface(&event, "Distribute", vLog.Data)
+				if err != nil {
+					fmt.Println("解析错误:", err)
+					continue
+				}
+
+				// 转 ETH
+				amount := new(big.Float).Quo(
+					new(big.Float).SetInt(event.Amount),
+					big.NewFloat(1e18),
+				)
+
+				record := models.NewDistributeRecord(DistributeAddr.Hex(), amount.String(), vLog.TxHash.Hex(), int64(vLog.BlockNumber))
+				err = record.Create()
+				if err != nil {
+					fmt.Println("写入数据库错误:", err)
+					continue
+				}
+				fmt.Println("✅ 已写入 PostgreSQL")
+			default:
+				fmt.Println("❌ 未知事件类型")
 				continue
 			}
 
-			// 转 ETH
-			amount := new(big.Float).Quo(
-				new(big.Float).SetInt(event.Amount),
-				big.NewFloat(1e18),
-			)
-
-			// 写入数据库
-			// record := FundRecord{
-			// 	Sender:   sender.Hex(),
-			// 	Amount:   amount.String(),
-			// 	TxHash:   vLog.TxHash.Hex(),
-			// 	BlockNum: int64(vLog.BlockNumber),
-			// }
-			// db.Create(&record)
-			// fmt.Println("✅ 已写入 PostgreSQL")
-
-			record := models.NewFundRecord(sender.Hex(), amount.String(), vLog.TxHash.Hex(), int64(vLog.BlockNumber))
-			err = record.Create()
-			if err != nil {
-				fmt.Println("写入数据库错误:", err)
-				continue
-			}
-			fmt.Println("✅ 已写入 PostgreSQL")
+			lastBlock = currentBlock
 		}
-
-		lastBlock = currentBlock
 	}
 }

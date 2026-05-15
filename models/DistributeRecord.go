@@ -18,9 +18,9 @@ func (DistributeRecord) TableName() string {
 	return "distribute_records"
 }
 
-func NewDistributeRecord(sender, amount, txHash string, blockNum int64) *DistributeRecord {
+func NewDistributeRecord(distributeaddr, amount, txHash string, blockNum int64) *DistributeRecord {
 	return &DistributeRecord{
-		DistributeAddr: sender,
+		DistributeAddr: distributeaddr,
 		Amount:         amount,
 		TxHash:         txHash,
 		BlockNum:       blockNum,
