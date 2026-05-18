@@ -9,6 +9,7 @@ import (
 
 	"funding-watch/abi"
 	"funding-watch/config"
+	"funding-watch/dao"
 	"funding-watch/models"
 
 	"github.com/ethereum/go-ethereum"
@@ -101,10 +102,24 @@ func StartWatch() {
 				)
 
 				record := models.NewFundRecord(sender.Hex(), amount.String(), vLog.TxHash.Hex(), int64(vLog.BlockNumber))
-				err = record.Create()
+				FundingRecordDao := dao.NewFundingRecordDao()
+				err = FundingRecordDao.InsertRecord(record)
 				if err != nil {
 					fmt.Println("写入数据库错误:", err)
 					continue
+				}
+				fundingTotalDao := dao.NewFundTotalRecordDao()
+				fundingTotal, err := fundingTotalDao.GetRecordBySender(sender.Hex())
+				fmt.Println(fundingTotal)
+				if len(fundingTotal) == 0 {
+					fundingTotalRecord := models.NewFundingTotalRecord(sender.Hex(), amount.String())
+					err = fundingTotalDao.Insert(fundingTotalRecord)
+				} else {
+					fundingTotalRecord := fundingTotal[0]
+					oldTotal, _ := new(big.Float).SetString(fundingTotalRecord.FundingTotal)
+					newTotal := new(big.Float).Add(oldTotal, amount)
+					fundingTotalRecord.FundingTotal = newTotal.String()
+					err = fundingTotalDao.Update(&fundingTotalRecord)
 				}
 				fmt.Println("✅ 已写入 PostgreSQL")
 			case refundedSig:
@@ -127,10 +142,23 @@ func StartWatch() {
 				)
 
 				record := models.NewReFundRecord(sender.Hex(), amount.String(), vLog.TxHash.Hex(), int64(vLog.BlockNumber))
-				err = record.Create()
+				ReFundingRecordDao := dao.NewReFundingRecordDao()
+				err = ReFundingRecordDao.InsertRecord(record)
 				if err != nil {
 					fmt.Println("写入数据库错误:", err)
 					continue
+				}
+				fundingTotalDao := dao.NewFundTotalRecordDao()
+				fundingTotal, err := fundingTotalDao.GetRecordBySender(sender.Hex())
+				fmt.Println(fundingTotal)
+				if len(fundingTotal) == 0 {
+					fmt.Println("❌ 无Funded记录，无法计算总资金")
+				} else {
+					fundingTotalRecord := fundingTotal[0]
+					oldTotal, _ := new(big.Float).SetString(fundingTotalRecord.FundingTotal)
+					newTotal := new(big.Float).Sub(oldTotal, amount)
+					fundingTotalRecord.FundingTotal = newTotal.String()
+					err = fundingTotalDao.Update(&fundingTotalRecord)
 				}
 				fmt.Println("✅ 已写入 PostgreSQL")
 			case distributeSig:
@@ -153,7 +181,8 @@ func StartWatch() {
 				)
 
 				record := models.NewDistributeRecord(DistributeAddr.Hex(), amount.String(), vLog.TxHash.Hex(), int64(vLog.BlockNumber))
-				err = record.Create()
+				DistributeRecordDao := dao.NewDistributeRecordDao()
+				err = DistributeRecordDao.InsertRecord(record)
 				if err != nil {
 					fmt.Println("写入数据库错误:", err)
 					continue

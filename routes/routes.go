@@ -11,7 +11,8 @@ func InitRoutes(router *gin.Engine) {
 	{
 		funding := apiV1.Group("/funding")
 		{
-			funding.POST("tx", controller.GetFundingRecords)
+			funding.POST("tx", controller.GetFundingRecordsbyTxHash)
+			funding.GET("", controller.GetFundingRecords)
 		}
 	}
 }

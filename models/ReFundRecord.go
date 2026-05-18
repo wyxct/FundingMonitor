@@ -1,7 +1,6 @@
 package models
 
 import (
-	"funding-watch/config"
 	"time"
 )
 
@@ -26,8 +25,4 @@ func NewReFundRecord(sender, amount, txHash string, blockNum int64) *ReFundRecor
 		BlockNum:  blockNum,
 		CreatedAt: time.Now(),
 	}
-}
-
-func (f *ReFundRecord) Create() error {
-	return config.DB.Create(f).Error
 }

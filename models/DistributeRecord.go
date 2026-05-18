@@ -1,7 +1,6 @@
 package models
 
 import (
-	"funding-watch/config"
 	"time"
 )
 
@@ -26,8 +25,4 @@ func NewDistributeRecord(distributeaddr, amount, txHash string, blockNum int64) 
 		BlockNum:       blockNum,
 		CreatedAt:      time.Now(),
 	}
-}
-
-func (f *DistributeRecord) Create() error {
-	return config.DB.Create(f).Error
 }

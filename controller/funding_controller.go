@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetFundingRecords(c *gin.Context) {
+func GetFundingRecordsbyTxHash(c *gin.Context) {
 	var req models.TxHashRequest
 	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(400, gin.H{
@@ -19,6 +19,18 @@ func GetFundingRecords(c *gin.Context) {
 	}
 	records, err := service.GetFundingRecords(req.TxHash)
 	fmt.Printf("tx_hash:%s", req.TxHash)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"message": "Failed to get funding records",
+			"error":   err.Error(),
+		})
+		return
+	}
+	c.JSON(200, gin.H{"data": records})
+}
+
+func GetFundingRecords(c *gin.Context) {
+	records, err := service.GetAllFundingRecords()
 	if err != nil {
 		c.JSON(500, gin.H{
 			"message": "Failed to get funding records",
