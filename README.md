@@ -21,33 +21,61 @@ GO-WATCH 链上众筹监控服务
 
 
 📂 项目结构plaintext.
+
 ├── abi/                  # 合约 ABI 定义
+
 │   ├── abi.go            # ABI 解析封装
+
 │   └── Funding.json      # 合约 ABI 文件
+
 ├── config/               # 配置文件与加载
+
 │   ├── config.go         # 配置结构体定义
+
 │   └── config.yaml       # 项目配置（RPC、DB 等）
+
 ├── controller/           # API 控制器层
+
 │   └── funding_controller.go
+
 ├── dao/                  # 数据访问层（所有 DB 操作）
+
 │   ├── fund_record_dao.go          # 捐款记录 DAO
+
 │   ├── refund_record_dao.go        # 退款记录 DAO
+
 │   ├── distribute_record_dao.go   # 分账记录 DAO
+
 │   └── fund_total_record_dao.go   # 用户总额统计 DAO
+
 ├── models/               # 数据库模型定义
+
 │   ├── FundRecord.go              # 捐款记录模型
+
 │   ├── ReFundRecord.go            # 退款记录模型
+
 │   ├── DistributeRecord.go       # 分账记录模型
+
 │   ├── FundingTotalRecord.go     # 用户总额统计模型
+
 │   └── requestModel.go           # API 请求结构体
+
 ├── routes/               # 路由定义
+
 │   └── routes.go
+
 ├── service/              # 业务逻辑层
+
 │   ├── funding_service.go        # 众筹相关业务逻辑
+
 │   └── watcher.go                # 链上事件监听服务
+
 ├── go.mod
+
 ├── go.sum
+
 └── main.go               # 程序入口
+
 
 
 🚀 核心功能说明
