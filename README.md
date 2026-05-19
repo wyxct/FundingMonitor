@@ -13,7 +13,12 @@ GO-WATCH 链上众筹监控服务
 
 
 🛠️ 技术栈
-表格模块技术 / 工具语言Go 1.21+链上交互go-ethereum/ethclientORMGORM v2数据库PostgreSQL配置Viper/YAMLAPI标准 net/http/ Gin（如使用）
+模块技术 / 工具语言Go 1.21+
+链上交互go-ethereum/ethclientORMGORM v2
+数据库PostgreSQL
+配置Viper/YAMLAPI
+标准 net/http/ Gin
+
 
 📂 项目结构plaintext.
 ├── abi/                  # 合约 ABI 定义
