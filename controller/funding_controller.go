@@ -40,3 +40,34 @@ func GetFundingRecords(c *gin.Context) {
 	}
 	c.JSON(200, gin.H{"data": records})
 }
+
+func GetFundRecordsRanking(c *gin.Context) {
+	records, err := service.GetFundTotalRecords()
+	if err != nil {
+		c.JSON(500, gin.H{
+			"message": "Failed to get funding records ranking",
+			"error":   err.Error(),
+		})
+		return
+	}
+	c.JSON(200, gin.H{"data": records})
+}
+
+func GetFundRecordsBySender(c *gin.Context) {
+	if c.Param("sender") == "" {
+		c.JSON(400, gin.H{
+			"message": "Invalid request",
+			"error":   "sender is required",
+		})
+		return
+	}
+	records, err := service.GetFundRecordsbyAddress(c.Param("sender"))
+	if err != nil {
+		c.JSON(500, gin.H{
+			"message": "Failed to get funding records by sender",
+			"error":   err.Error(),
+		})
+		return
+	}
+	c.JSON(200, gin.H{"data": records})
+}

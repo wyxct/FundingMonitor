@@ -13,6 +13,8 @@ func InitRoutes(router *gin.Engine) {
 		{
 			funding.POST("tx", controller.GetFundingRecordsbyTxHash)
 			funding.GET("", controller.GetFundingRecords)
+			funding.GET("ranking", controller.GetFundRecordsRanking)
+			funding.GET("sender/:sender", controller.GetFundRecordsBySender)
 		}
 	}
 }
