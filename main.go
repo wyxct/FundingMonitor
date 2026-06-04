@@ -129,6 +129,7 @@ package main
 import (
 	"fmt"
 	"funding-watch/abi"
+	"funding-watch/chain"
 	"funding-watch/config"
 	"funding-watch/routes"
 	"funding-watch/service"
@@ -139,6 +140,7 @@ import (
 func main() {
 	config.LoadConfig()
 	config.InitDB()
+	chain.ChainInit()
 	abi.InitABI()
 	go service.StartWatch()
 	r := gin.Default()

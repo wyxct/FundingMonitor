@@ -8,45 +8,33 @@ import (
 	"time"
 
 	"funding-watch/abi"
+	"funding-watch/chain"
 	"funding-watch/config"
 	"funding-watch/dao"
 	"funding-watch/models"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 func StartWatch() {
-	// ===================== 你的配置 =====================
-	rpcURL := config.C.Chain.RpcUrl
 	contractAddr := config.C.Chain.Contract
-	// ====================================================
 
-	// 2. 连接链
-	client, err := ethclient.Dial(rpcURL)
-	if err != nil {
-		log.Fatal("链连接失败:", err)
-	}
-	fmt.Println("✅ 链连接成功")
+	client := chain.Client
 
-	// 3. 解析ABI
 	parsedABI := abi.FundingABI
 
 	contractAddress := common.HexToAddress(contractAddr)
 	fmt.Printf("✅ 合约地址为：%s\n", contractAddress.Hex())
-	// 4. 从当前最新块开始监听
 	lastBlock, err := client.BlockNumber(context.Background())
 	if err != nil {
 		log.Fatal("获取块高失败:", err)
 	}
 	fmt.Printf("✅ 开始监听 Funded 事件，从块高 %d 开始\n", lastBlock)
 
-	// 5. 循环轮询（兼容 Hardhat 本地节点）
 	for {
 		time.Sleep(1 * time.Second)
 
-		// 当前最新块
 		currentBlock, err := client.BlockNumber(context.Background())
 		if err != nil {
 			fmt.Println("获取最新块错误:", err)
@@ -57,7 +45,6 @@ func StartWatch() {
 			continue
 		}
 
-		// 查询区间日志
 		query := ethereum.FilterQuery{
 			Addresses: []common.Address{contractAddress},
 			FromBlock: big.NewInt(int64(lastBlock + 1)),
@@ -71,7 +58,6 @@ func StartWatch() {
 			continue
 		}
 
-		// 处理每条日志
 		for _, vLog := range logs {
 			fmt.Printf("\n📥 收到交易：%s\n", vLog.TxHash.Hex())
 
@@ -95,7 +81,6 @@ func StartWatch() {
 					continue
 				}
 
-				// 转 ETH
 				amount := new(big.Float).Quo(
 					new(big.Float).SetInt(event.Amount),
 					big.NewFloat(1e18),
@@ -135,7 +120,6 @@ func StartWatch() {
 					continue
 				}
 
-				// 转 ETH
 				amount := new(big.Float).Quo(
 					new(big.Float).SetInt(event.Amount),
 					big.NewFloat(1e18),
